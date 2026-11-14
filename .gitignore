@@ -1,0 +1,21 @@
+# Build artifacts
+build/
+bin/
+*.o
+*.out
+main
+
+# Data dumps
+*.pcm
+*.raw
+txdata.txt
+
+# Python
+__pycache__/
+*.pyc
+
+# IDE / OS
+.DS_Store
+.idea/
+
+*.sln
