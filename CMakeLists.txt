@@ -10,14 +10,16 @@ option(PLUTO_TIMESTAMP "Build pluto with timestamp" ON)
 # RF frontend driver
 find_package(SoapySDR REQUIRED)
 
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/src/main.c")
-    set(MAIN_SOURCE_FILES src/main.c)
-else()
-    set(MAIN_SOURCE_FILES main.c)
-endif()
+include_directories(include)
 
-# Добавляем исполняемый файл
+set(MAIN_SOURCE_FILES
+    main.c
+    src/config.c
+    src/sdr_device.c
+    src/signal_gen.c
+    src/sdr_stream.c
+)
+
 add_executable(main ${MAIN_SOURCE_FILES})
 
 target_link_libraries(main ${SoapySDR_LIBRARIES} m)
-
