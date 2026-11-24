@@ -129,26 +129,20 @@ python3 read.py
 
 ```text
 SDR/
-├── CMakeLists.txt        # Сборочный конфигурационный файл CMake
-├── main.c                # Точка входа программы (оркестрация и CLI)
-├── include/              # Заголовочные файлы модулей
-│   ├── config.h          # Конфигурация, структуры и константы
-│   ├── sdr_device.h      # Инициализация и настройка радиочастотного тракта SDR
-│   ├── sdr_stream.h      # Управление потоками RX/TX и цикл передачи/приема
-│   └── signal_gen.h      # Генератор отсчетов тестового сигнала (пачки и паузы)
-├── src/                  # Реализация модулей
-│   ├── config.c          # Заполнение параметров AppConfig
-│   ├── sdr_device.c      # Реализация создания и настройки устройства SoapySDR
-│   ├── sdr_stream.c      # Реализация потокового обмена и записи в .pcm
-│   └── signal_gen.c      # Реализация синтеза отсчетов в буфер передачи
-├── read.py               # Скрипт анализа и визуализации на Python (Matplotlib, NumPy)
-├── reports/              # Отчеты по лабораторным работам
-│   ├── report_1.md       # Отчет №1 (GNU Radio, спектрограмма, WBFM)
-│   ├── report_2.md       # Отчет №2 (SoapySDR, импульсный сигнал s1.png)
-│   └── report_3.md       # Отчет №3 (две SDR, анализ детального графика s6.png)
-├── images/               # Иллюстрации и графики
-├── SoapySDR/             # Субмодуль SoapySDR
-├── SoapyPlutoSDR/        # Субмодуль драйвера PlutoSDR
-├── libiio/               # Субмодуль библиотеки Industrial I/O
-└── libad9361-iio/        # Субмодуль AD9361
+SDR/
+├── CMakeLists.txt          # C++17, SoapySDR
+├── main.cpp                # точка входа
+├── include/
+│   ├── config.hpp          # AppConfig, constexpr константы
+│   ├── sdr_device.hpp      # DevicePtr (unique_ptr), create/configure
+│   ├── signal_gen.hpp      # ComplexSample, BPSK/QPSK, upsample, convolve
+│   └── sdr_stream.hpp      # run_sdr_streams()
+├── src/
+│   ├── config.cpp
+│   ├── sdr_device.cpp      # SoapySDR::Device C++ API
+│   ├── signal_gen.cpp      # std::vector, std::complex<int16_t>
+│   └── sdr_stream.cpp      # C++ streams, ofstream
+├── read.py                 # Python визуализация (без изменений)
+├── visualization.html      # JS визуализация (без изменений)
+└── reports/                # Отчёты 1-5
 ```
