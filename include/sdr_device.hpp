@@ -1,19 +1,8 @@
 #pragma once
 
 #include "config.hpp"
-#include <SoapySDR/Device.hpp>
-#include <memory>
-#include <string>
+#include <SoapySDR/Device.h>
 
-struct SoapyDeviceDeleter {
-    void operator()(SoapySDR::Device *device) const {
-        if (device) {
-            SoapySDR::Device::unmake(device);
-        }
-    }
-};
-
-using DevicePtr = std::unique_ptr<SoapySDR::Device, SoapyDeviceDeleter>;
-
-DevicePtr create_device(const std::string &uri);
-void configure_rf(SoapySDR::Device *sdr, const AppConfig &config);
+SoapySDRDevice *create_device(const std::string &uri);
+void configure_rf(SoapySDRDevice *sdr, const AppConfig &config);
+void destroy_device(SoapySDRDevice *sdr);

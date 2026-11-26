@@ -1,31 +1,34 @@
 #include "config.hpp"
 #include "sdr_device.hpp"
 #include "sdr_stream.hpp"
-#include <iostream>
-#include <string>
 
-int main(int argc, char **argv)
-{
-    if (argc < 2) {
-        std::cout << "Argument required: 1 - Rx, 0 - Tx\n";
-        return EXIT_FAILURE;
-    }
+#include <cstdio>
+#include <cstdlib>
 
-    int mode = std::stoi(argv[1]);
-    AppConfig config = init_config(mode);
+int main(int argc, char **argv) {
+  if (argc < 2) {
+    std::printf("Argument required: 1 - Rx, 0 - Tx\n");
+    return EXIT_FAILURE;
+  }
 
-    DevicePtr sdr = create_device(config.uri);
-    if (!sdr) {
-        return EXIT_FAILURE;
-    }
+  AppConfig config;
+  init_config(config, std::atoi(argv[1]));
 
-    configure_rf(sdr.get(), config);
+  SoapySDRDevice *sdr = create_device(config.uri);
+  if (!sdr) {
+    std::printf("SoapySDRDevice_make fail: %s\n", SoapySDRDevice_lastError());
+    return EXIT_FAILURE;
+  }
 
-    int status = run_sdr_streams(sdr.get(), config);
+  configure_rf(sdr, config);
 
-    if (status == EXIT_SUCCESS) {
-        std::cout << "test complete!\n";
-    }
+  int status = run_sdr_streams(sdr, config);
 
-    return status;
+  destroy_device(sdr);
+
+  if (status == EXIT_SUCCESS) {
+    std::printf("test complete!\n");
+  }
+
+  return status;
 }

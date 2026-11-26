@@ -1,38 +1,43 @@
 #include "sdr_device.hpp"
-#include <iostream>
 
-DevicePtr create_device(const std::string &uri)
-{
-    SoapySDR::Kwargs args;
-    args["driver"] = "plutosdr";
-    args["uri"] = uri;
-    args["loopback"] = "0";
+#include <cstdio>
 
-    SoapySDR::Device *device = nullptr;
-    try {
-        device = SoapySDR::Device::make(args);
-    } catch (const std::exception &ex) {
-        std::cerr << "SoapySDR::Device::make fail: " << ex.what() << '\n';
-        return nullptr;
-    }
+SoapySDRDevice *create_device(const std::string &uri) {
+  SoapySDRKwargs args{};
+  SoapySDRKwargs_set(&args, "driver", "plutosdr");
+  SoapySDRKwargs_set(&args, "uri", uri.c_str());
+  SoapySDRKwargs_set(&args, "loopback", "0");
 
-    return DevicePtr(device);
+  SoapySDRDevice *sdr = SoapySDRDevice_make(&args);
+  SoapySDRKwargs_clear(&args);
+  return sdr;
 }
 
-void configure_rf(SoapySDR::Device *sdr, const AppConfig &config)
-{
-    try {
-        sdr->setSampleRate(SOAPY_SDR_RX, 0, config.rate);
-        sdr->setFrequency(SOAPY_SDR_RX, 0, config.rx_freq);
-        sdr->setGain(SOAPY_SDR_RX, 0, config.rx_gain);
+void configure_rf(SoapySDRDevice *sdr, const AppConfig &config) {
+  if (SoapySDRDevice_setSampleRate(sdr, SOAPY_SDR_RX, 0, config.rate) != 0)
+    std::printf("setSampleRate rx fail: %s\n", SoapySDRDevice_lastError());
+  if (SoapySDRDevice_setFrequency(sdr, SOAPY_SDR_RX, 0, config.rx_freq,
+                                  nullptr) != 0)
+    std::printf("setFrequency rx fail: %s\n", SoapySDRDevice_lastError());
+  if (SoapySDRDevice_setGain(sdr, SOAPY_SDR_RX, 0, config.rx_gain) != 0)
+    std::printf("setGain rx fail: %s\n", SoapySDRDevice_lastError());
 
-        sdr->setSampleRate(SOAPY_SDR_TX, 0, config.rate);
-        sdr->setFrequency(SOAPY_SDR_TX, 0, config.tx_freq);
-        sdr->setGain(SOAPY_SDR_TX, 0, config.tx_gain);
+  if (SoapySDRDevice_setSampleRate(sdr, SOAPY_SDR_TX, 0, config.rate) != 0)
+    std::printf("setSampleRate tx fail: %s\n", SoapySDRDevice_lastError());
+  if (SoapySDRDevice_setFrequency(sdr, SOAPY_SDR_TX, 0, config.tx_freq,
+                                  nullptr) != 0)
+    std::printf("setFrequency tx fail: %s\n", SoapySDRDevice_lastError());
+  if (SoapySDRDevice_setGain(sdr, SOAPY_SDR_TX, 0, config.tx_gain) != 0)
+    std::printf("setGain tx fail: %s\n", SoapySDRDevice_lastError());
 
-        std::cout << "TX carrier: " << (sdr->getFrequency(SOAPY_SDR_TX, 0) / 1e6) << " MHz\n";
-        std::cout << "RX carrier: " << (sdr->getFrequency(SOAPY_SDR_RX, 0) / 1e6) << " MHz\n";
-    } catch (const std::exception &ex) {
-        std::cerr << "configure_rf fail: " << ex.what() << '\n';
-    }
+  std::printf("TX carrier: %.3f MHz\n",
+              SoapySDRDevice_getFrequency(sdr, SOAPY_SDR_TX, 0) / 1e6);
+  std::printf("RX carrier: %.3f MHz\n",
+              SoapySDRDevice_getFrequency(sdr, SOAPY_SDR_RX, 0) / 1e6);
+}
+
+void destroy_device(SoapySDRDevice *sdr) {
+  if (sdr) {
+    SoapySDRDevice_unmake(sdr);
+  }
 }
